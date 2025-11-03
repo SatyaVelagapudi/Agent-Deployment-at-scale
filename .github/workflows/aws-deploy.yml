@@ -12,8 +12,6 @@ env:
   AWS_CLUSTER_REGION: eu-north-1
   ECR_REPOSITORY: test-spring-boot-app
   EKS_CLUSTER_NAME: gen-ai-eks-1
-  # Full ECR URI derived from env vars
-  ECR_REGISTRY: ${{ env.AWS_ACCOUNT_ID }}.dkr.ecr.${{ env.AWS_REGION }}.amazonaws.com
 
 jobs:
   build-and-deploy:
@@ -52,6 +50,9 @@ jobs:
           # Build for linux/amd64 as EKS nodes typically use this architecture
           docker build --platform linux/amd64 -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
           docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+
+      - name: Set ECR_REGISTRY env
+        run: echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> $GITHUB_ENV
 
       - name: Set Kubeconfig for EKS
         run: |
