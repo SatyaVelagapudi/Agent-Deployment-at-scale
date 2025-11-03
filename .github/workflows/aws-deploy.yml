@@ -60,6 +60,9 @@ jobs:
       - name: Set ECR_REGISTRY env
         run: echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.us-east-1.amazonaws.com" >> $GITHUB_ENV
 
+      - name: Log in to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
+
       - name: Build and push JpaGenerator image to ECR
         uses: docker/build-push-action@v4
         with:
