@@ -7,7 +7,7 @@ on:
 
 env:
   # IMPORTANT: Replace these placeholders with your actual values
-  AWS_ACCOUNT_ID: "774305586623" # Your AWS account ID
+  AWS_ACCOUNT_ID: "774305586623" # Your AWS account ID here
   AWS_REGION: us-east-1
   AWS_CLUSTER_REGION: eu-north-1
   JPA_ECR_REPOSITORY: jpagenerator
