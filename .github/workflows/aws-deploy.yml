@@ -17,7 +17,7 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     permissions:
-      id-token: write # Required for OIDC authentication
+      id-token: write # Required for OIDC authentication GITHub to AWS
       contents: read
 
     steps:
