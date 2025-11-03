@@ -10,7 +10,8 @@ env:
   AWS_ACCOUNT_ID: "774305586623" # Your AWS account ID
   AWS_REGION: us-east-1
   AWS_CLUSTER_REGION: eu-north-1
-  ECR_REPOSITORY: test-spring-boot-app
+  JPA_ECR_REPOSITORY: jpagenerator
+  SPC_ECR_REPOSITORY: sppromptconverter
   EKS_CLUSTER_NAME: gen-ai-eks-1
 
 jobs:
@@ -60,12 +61,21 @@ jobs:
       - name: Set ECR_REGISTRY env
         run: echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> $GITHUB_ENV
 
-      - name: Build and push Docker image to ECR
-        run: |
-          IMAGE_TAG=${{ github.sha }}
-          # Build for linux/amd64 as EKS nodes typically use this architecture
-          docker build --platform linux/amd64 -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
-          docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
+      - name: Build and push JpaGenerator image to ECR
+        uses: docker/build-push-action@v4
+        with:
+          context: ./JpaGenerator
+          file: ./JpaGenerator/Dockerfile
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.JPA_ECR_REPOSITORY }}:${{ github.sha }}
+
+      - name: Build and push SpPromptConverter image to ECR
+        uses: docker/build-push-action@v4
+        with:
+          context: ./SpPromptConverter
+          file: ./SpPromptConverter/Dockerfile
+          push: true
+          tags: ${{ env.ECR_REGISTRY }}/${{ env.SPC_ECR_REPOSITORY }}:${{ github.sha }}
 
       - name: Set Kubeconfig for EKS
         run: |
@@ -76,8 +86,9 @@ jobs:
 
       - name: Deploy to EKS with Helm
         run: |
-          # This command installs or upgrades your application using the chart in the ./helm directory
           helm upgrade --install spring-app-release ./helm \
             --namespace default \
-            --set image.repository=${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }} \
-            --set image.tag=${{ github.sha }}
+            --set jpaGenerator.image.repository=${{ env.ECR_REGISTRY }}/${{ env.JPA_ECR_REPOSITORY }} \
+            --set jpaGenerator.image.tag=${{ github.sha }} \
+            --set spPromptConverter.image.repository=${{ env.ECR_REGISTRY }}/${{ env.SPC_ECR_REPOSITORY }} \
+            --set spPromptConverter.image.tag=${{ github.sha }}
