@@ -57,15 +57,15 @@ jobs:
       - name: Log in to Amazon ECR
         uses: aws-actions/amazon-ecr-login@v2
 
+      - name: Set ECR_REGISTRY env
+        run: echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> $GITHUB_ENV
+
       - name: Build and push Docker image to ECR
         run: |
           IMAGE_TAG=${{ github.sha }}
           # Build for linux/amd64 as EKS nodes typically use this architecture
           docker build --platform linux/amd64 -t ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG .
           docker push ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:$IMAGE_TAG
-
-      - name: Set ECR_REGISTRY env
-        run: echo "ECR_REGISTRY=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com" >> $GITHUB_ENV
 
       - name: Set Kubeconfig for EKS
         run: |
