@@ -31,8 +31,21 @@ jobs:
           distribution: 'temurin'
           cache: 'maven'
 
-      - name: Build with Maven
-        run: mvn -B package --file pom.xml
+      - name: Make gradlew executable (JpaGenerator)
+        run: chmod +x gradlew
+        working-directory: ./JpaGenerator
+
+      - name: Build JpaGenerator (Gradle)
+        run: ./gradlew clean build -x test
+        working-directory: ./JpaGenerator
+
+      - name: Make gradlew executable (SpPromptConverter)
+        run: chmod +x gradlew
+        working-directory: ./SpPromptConverter
+
+      - name: Build SpPromptConverter (Gradle)
+        run: ./gradlew clean build -x test
+        working-directory: ./SpPromptConverter
 
       # Configure AWS Credentials using OIDC
       - name: Configure AWS Credentials
